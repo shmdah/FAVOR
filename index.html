@@ -3,399 +3,762 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#3E2723">
-    
-    <title>Midnight Prep ✨</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Midnight Prep - Packing Assistant</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
+
     <style>
+        :root {
+            --win-bg: #008080;
+            --win-grey: #c0c0c0;
+            --win-dark: #000080;
+            --win-text: #000000;
+            --win-light: #ffffff;
+            --win-shadow: #808080;
+            --win-shadow-dark: #404040;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: #3E2723; /* Deep Brown Background */
-            color: #EFEBE9; /* Light Cream Text */
-            /* Prevent bounce effect on iOS */
-            overscroll-behavior-y: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        h1, h2, h3, .font-serif {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Tahoma', 'MS Sans Serif', 'Arial', sans-serif;
+            font-size: 11px;
+            background-color: var(--win-bg);
+            min-height: 100vh;
+            color: var(--win-text);
+            overflow-x: hidden;
         }
 
-        /* Custom Parallax & Animations */
-        .parallax-bg {
-            background-attachment: scroll; 
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
+        /* ===== TASKBAR ===== */
+        #taskbar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 30px;
+            background: var(--win-grey);
+            border-top: 2px solid var(--win-light);
+            box-shadow: inset 0 1px 0 var(--win-shadow);
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            z-index: 1000;
+            gap: 4px;
         }
-        @media (min-width: 768px) {
-            .parallax-bg {
-                background-attachment: fixed;
-            }
+        #start-btn {
+            display: flex; align-items: center; gap: 5px;
+            height: 22px; padding: 0 10px;
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-light) var(--win-shadow-dark) var(--win-shadow-dark) var(--win-light);
+            font-weight: bold; font-size: 11px; font-family: 'Tahoma', sans-serif;
+            cursor: pointer;
         }
-        
-        .fade-in-up {
-            animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        #start-btn:active {
+            border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
         }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .taskbar-sep {
+            width: 2px; height: 22px;
+            border-left: 1px solid var(--win-shadow);
+            border-right: 1px solid var(--win-light);
+            margin: 0 2px;
+        }
+        .taskbar-btn {
+            display: flex; align-items: center; gap: 4px;
+            height: 22px; padding: 0 8px;
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+            font-family: 'Tahoma', sans-serif; font-size: 11px;
+            cursor: pointer; min-width: 130px;
+        }
+        .taskbar-btn:hover { background: #d4d0c8; }
+        #clock {
+            margin-left: auto;
+            height: 22px;
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            padding: 0 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; background: var(--win-grey);
+            min-width: 55px;
         }
 
-        /* Glassmorphism utility - Darker for brown theme */
-        .glass {
-            background: rgba(62, 39, 35, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* ===== DESKTOP ICONS ===== */
+        #desktop-icons {
+            position: fixed; top: 12px; left: 12px;
+            display: flex; flex-direction: column;
+            gap: 16px; z-index: 10;
         }
-        
-        .glass-card {
-            background: rgba(78, 52, 46, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .desktop-icon {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 3px;
+            cursor: pointer; padding: 4px; width: 72px;
+            text-align: center;
+        }
+        .desktop-icon .d-icon { font-size: 28px; line-height: 1; }
+        .desktop-icon .d-label {
+            font-size: 10px; font-family: 'Tahoma', sans-serif;
+            color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+            padding: 1px 2px; line-height: 1.3;
+        }
+        .desktop-icon:hover .d-label { background: var(--win-dark); }
+
+        /* ===== WINDOW BASE ===== */
+        .win-window {
+            position: absolute;
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-light) var(--win-shadow-dark) var(--win-shadow-dark) var(--win-light);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.45);
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .win-window.visible { display: flex; }
+        .win-window.maximized {
+            position: fixed !important;
+            top: 0 !important; left: 0 !important;
+            right: 0 !important; bottom: 30px !important;
+            width: 100% !important;
+            height: calc(100vh - 30px) !important;
+            z-index: 500;
         }
 
-        /* Mobile Safe Area utilities */
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom);
+        /* ===== TITLE BAR ===== */
+        .title-bar {
+            background: linear-gradient(to right, #000080 0%, #1084d0 100%);
+            height: 22px;
+            display: flex; align-items: center;
+            padding: 0 3px; gap: 4px;
+            user-select: none; cursor: move;
+        }
+        .title-bar-text {
+            color: white; font-size: 11px; font-weight: bold;
+            font-family: 'Tahoma', sans-serif;
+            flex: 1; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .title-bar-controls { display: flex; gap: 2px; flex-shrink: 0; }
+        .title-btn {
+            width: 16px; height: 14px;
+            background: var(--win-grey);
+            border: 1px solid;
+            border-color: var(--win-light) var(--win-shadow-dark) var(--win-shadow-dark) var(--win-light);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 9px; font-weight: bold;
+            line-height: 1; padding: 0; font-family: 'Tahoma', sans-serif;
+        }
+        .title-btn:active {
+            border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+        }
+        .title-btn.close:hover { background: #c00000; color: white; }
+
+        /* ===== MENU BAR ===== */
+        .menu-bar {
+            height: 20px; background: var(--win-grey);
+            border-bottom: 1px solid var(--win-shadow);
+            display: flex; align-items: center; padding: 0 2px;
+        }
+        .menu-item {
+            padding: 2px 8px; font-size: 11px;
+            cursor: pointer; height: 18px;
+            display: flex; align-items: center;
+        }
+        .menu-item:hover { background: var(--win-dark); color: white; }
+        .u { text-decoration: underline; }
+
+        /* ===== BUTTONS ===== */
+        .win-btn {
+            display: inline-flex; align-items: center;
+            justify-content: center; gap: 5px;
+            height: 26px; padding: 0 16px;
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-light) var(--win-shadow-dark) var(--win-shadow-dark) var(--win-light);
+            font-family: 'Tahoma', sans-serif; font-size: 11px;
+            cursor: pointer; min-width: 80px;
+        }
+        .win-btn:active {
+            border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+        }
+        .win-btn:focus { outline: 1px dotted #000; outline-offset: -4px; }
+        .win-btn.primary { font-weight: bold; }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            height: 22px;
+            border-top: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            display: flex; align-items: center;
+            padding: 0 4px; gap: 3px;
+            background: var(--win-grey);
+        }
+        .status-pane {
+            border: 1px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            height: 16px; padding: 0 6px;
+            display: flex; align-items: center; font-size: 10px;
         }
 
-        /* Menu Overlay Transition */
-        #menu-overlay {
-            transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+        /* ===== HOME WINDOW ===== */
+        #home-window {
+            top: 50px; left: 50%;
+            transform: translateX(-50%);
+            width: 460px; max-width: calc(100vw - 20px);
         }
-        
-        .menu-open {
-            overflow: hidden;
+        .home-body { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .profile-frame {
+            border: 3px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            padding: 4px; background: var(--win-grey); display: inline-block;
+        }
+        .profile-frame img { display: block; width: 80px; height: 80px; object-fit: cover; }
+        .win-title-block { text-align: center; }
+        .win-title-block h1 {
+            font-size: 24px; font-weight: bold; color: var(--win-dark);
+            font-family: 'Tahoma', sans-serif;
+        }
+        .win-title-block h2 {
+            font-size: 11px; color: var(--win-shadow-dark);
+            letter-spacing: 2.5px; text-transform: uppercase;
+            font-family: 'Tahoma', sans-serif; margin-top: 2px;
+        }
+        .info-box {
+            width: 100%; background: white;
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            padding: 8px 12px; font-size: 11px;
+            display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+        }
+        .home-footer {
+            font-size: 10px; color: var(--win-shadow-dark);
+            border-top: 1px solid var(--win-shadow); padding-top: 8px;
+            width: 100%; text-align: center;
+        }
+
+        /* ===== PACKING WINDOW ===== */
+        #packing-window {
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            width: 640px; max-width: calc(100vw - 10px);
+            height: calc(100vh - 60px); max-height: 680px;
+        }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            height: 30px;
+            border-bottom: 1px solid var(--win-shadow);
+            display: flex; align-items: center;
+            padding: 2px 4px; gap: 2px; background: var(--win-grey);
+        }
+        .tb-btn {
+            display: flex; align-items: center; gap: 3px;
+            height: 22px; padding: 0 7px;
+            background: var(--win-grey);
+            border: 1px solid transparent;
+            font-size: 10px; cursor: pointer;
+            font-family: 'Tahoma', sans-serif;
+        }
+        .tb-btn:hover {
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+        }
+        .tb-btn:active {
+            border-color: var(--win-light) var(--win-shadow) var(--win-shadow) var(--win-light);
+        }
+        .tb-sep {
+            width: 2px; height: 20px;
+            border-left: 1px solid var(--win-shadow);
+            border-right: 1px solid var(--win-light);
+            margin: 0 3px;
+        }
+
+        /* ===== ADDRESS BAR ===== */
+        .address-bar {
+            height: 26px;
+            border-bottom: 1px solid var(--win-shadow);
+            display: flex; align-items: center;
+            padding: 0 6px; gap: 6px;
+            background: var(--win-grey);
+        }
+        .addr-label { font-weight: bold; font-size: 10px; white-space: nowrap; }
+        .addr-input {
+            flex: 1; height: 18px;
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            background: white; font-size: 11px; padding: 0 4px;
+            font-family: 'Tahoma', sans-serif;
+        }
+        .addr-go {
+            height: 18px; padding: 0 10px;
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-light) var(--win-shadow-dark) var(--win-shadow-dark) var(--win-light);
+            font-size: 10px; cursor: pointer;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-row {
+            height: 24px;
+            border-bottom: 1px solid var(--win-shadow);
+            display: flex; align-items: center;
+            padding: 0 8px; gap: 8px;
+            background: var(--win-grey);
+        }
+        .prog-label { font-weight: bold; font-size: 10px; white-space: nowrap; }
+        .prog-track {
+            flex: 1; height: 16px;
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            background: white; overflow: hidden;
+        }
+        .prog-fill {
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                #000080 0px, #000080 9px,
+                #1084d0 9px, #1084d0 18px
+            );
+            transition: width 0.5s ease;
+        }
+        .prog-pct { min-width: 34px; text-align: right; font-size: 11px; font-weight: bold; }
+
+        /* ===== PACKING BODY ===== */
+        .packing-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 155px; flex-shrink: 0;
+            border-right: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            background: var(--win-grey);
+            overflow-y: auto; padding: 4px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .sb-heading {
+            font-weight: bold; font-size: 9px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            background: var(--win-dark); color: white;
+            padding: 2px 5px; margin-bottom: 2px;
+        }
+        .sb-link {
+            display: flex; align-items: center; gap: 5px;
+            padding: 3px 6px; font-size: 11px;
+            cursor: pointer; color: var(--win-dark);
+            text-decoration: underline;
+        }
+        .sb-link:hover { background: #316ac5; color: white; }
+        .sb-tip {
+            font-size: 9px; color: var(--win-shadow-dark);
+            padding: 5px; background: white;
+            border: 1px solid var(--win-shadow);
+            text-align: center; line-height: 1.5;
+            margin-top: auto;
+        }
+
+        /* ===== MAIN PANE ===== */
+        .main-pane { flex: 1; overflow-y: auto; background: white; }
+
+        /* ===== CATEGORY ===== */
+        .cat-section { border-bottom: 1px solid #d4d0c8; }
+        .cat-header {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white; font-weight: bold; font-size: 11px;
+            padding: 3px 8px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .cat-header-left { display: flex; align-items: center; gap: 5px; }
+        .cat-count {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 0 6px; font-size: 10px; border-radius: 2px;
+        }
+
+        /* ===== PACK ITEM ===== */
+        .pack-item {
+            display: flex; align-items: center;
+            padding: 5px 10px; gap: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0ede8;
+            font-size: 11px; background: white;
+        }
+        .pack-item:last-child { border-bottom: none; }
+        .pack-item:hover { background: #ddeeff; }
+        .pack-item.packed { color: var(--win-shadow); }
+        .pack-item.packed .pack-label { text-decoration: line-through; }
+
+        .pack-cb {
+            width: 13px; height: 13px; flex-shrink: 0;
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+            background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold; line-height: 1;
+        }
+
+        /* ===== DIALOGS ===== */
+        #about-dialog, #complete-dialog {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 340px; z-index: 900;
+        }
+        .dlg-body {
+            padding: 14px 14px 8px;
+            display: flex; gap: 12px; align-items: flex-start;
+        }
+        .dlg-icon { font-size: 36px; flex-shrink: 0; }
+        .dlg-text h3 { font-weight: bold; font-size: 13px; margin-bottom: 5px; }
+        .dlg-text p { font-size: 11px; margin-bottom: 3px; line-height: 1.5; }
+        .dlg-hr {
+            height: 0; margin: 6px 12px;
+            border: 0;
+            border-top: 1px solid var(--win-shadow);
+            border-bottom: 1px solid var(--win-light);
+        }
+        .dlg-btns { padding: 8px 12px 10px; display: flex; justify-content: center; gap: 8px; }
+
+        /* ===== SCROLLBARS ===== */
+        ::-webkit-scrollbar { width: 16px; height: 16px; }
+        ::-webkit-scrollbar-track { background: var(--win-grey); }
+        ::-webkit-scrollbar-thumb {
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-light) var(--win-shadow-dark) var(--win-shadow-dark) var(--win-light);
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 600px) {
+            .sidebar { display: none; }
+            #home-window, #packing-window { left: 5px; transform: none; }
+            #packing-window { width: calc(100vw - 10px); }
+            .address-bar { display: none; }
         }
     </style>
 </head>
-<body class="selection:bg-[#D7CCC8] selection:text-[#3E2723] pb-safe">
+<body>
 
-    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[60] p-3 rounded-full glass text-[#EFEBE9] hover:bg-white/10 transition-all shadow-lg active:scale-95">
-        <i id="menu-icon" data-lucide="menu" class="w-6 h-6"></i>
+<!-- Desktop Icons -->
+<div id="desktop-icons">
+    <div class="desktop-icon" ondblclick="openHome()">
+        <div class="d-icon">✈️</div>
+        <span class="d-label">Midnight Prep</span>
+    </div>
+    <div class="desktop-icon" ondblclick="openPacking()">
+        <div class="d-icon">💼</div>
+        <span class="d-label">Packing List</span>
+    </div>
+    <div class="desktop-icon" ondblclick="openAbout()">
+        <div class="d-icon">ℹ️</div>
+        <span class="d-label">About</span>
+    </div>
+</div>
+
+<!-- ===== HOME WINDOW ===== -->
+<div id="home-window" class="win-window visible" role="dialog" aria-label="Midnight Prep">
+    <div class="title-bar" onmousedown="startDrag(event,'home-window')">
+        <span style="font-size:12px;">✈️</span>
+        <span class="title-bar-text">Midnight Prep</span>
+        <div class="title-bar-controls">
+            <button class="title-btn" title="Minimize" onclick="minimizeWin('home-window','btn-home')">_</button>
+            <button class="title-btn" title="Maximize" onclick="toggleMax('home-window')">□</button>
+            <button class="title-btn close" title="Close" onclick="closeWin('home-window','btn-home')">✕</button>
+        </div>
+    </div>
+    <div class="menu-bar">
+        <div class="menu-item"><span class="u">F</span>ile</div>
+        <div class="menu-item"><span class="u">V</span>iew</div>
+        <div class="menu-item" onclick="openAbout()"><span class="u">H</span>elp</div>
+    </div>
+    <div style="padding:14px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div class="profile-frame">
+            <img src="images/mama.png" alt="Mama - profile photo">
+        </div>
+        <div class="win-title-block">
+            <h1>Midnight Prep</h1>
+            <h2>Before 12 AM</h2>
+        </div>
+        <div class="info-box">
+            <span style="font-size:18px; flex-shrink:0;">💡</span>
+            <span>Welcome! This program helps you pack everything before the midnight deadline. Click <strong>Start Packing</strong> to begin, or double-click the desktop icons to navigate.</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:2px;">
+            <button class="win-btn primary" onclick="openPacking()">📦 Start Packing</button>
+            <button class="win-btn" onclick="openAbout()">ℹ️ About</button>
+        </div>
+        <div class="home-footer">
+            Midnight Prep v1.0 &nbsp;•&nbsp; © 2000 Code by Thursday &nbsp;•&nbsp; All rights reserved
+        </div>
+    </div>
+    <div class="status-bar">
+        <div class="status-pane" style="flex:1;">Ready</div>
+        <div class="status-pane">Let&apos;s get everything ready ✨</div>
+    </div>
+</div>
+
+<!-- ===== PACKING WINDOW ===== -->
+<div id="packing-window" class="win-window" role="dialog" aria-label="Packing List">
+    <div class="title-bar" onmousedown="startDrag(event,'packing-window')">
+        <span style="font-size:12px;">💼</span>
+        <span class="title-bar-text">Packing List — Beat the 12AM Deadline</span>
+        <div class="title-bar-controls">
+            <button class="title-btn" title="Minimize" onclick="minimizeWin('packing-window','btn-packing')">_</button>
+            <button class="title-btn" title="Maximize" onclick="toggleMax('packing-window')">□</button>
+            <button class="title-btn close" title="Close" onclick="closeWin('packing-window','btn-packing')">✕</button>
+        </div>
+    </div>
+    <div class="menu-bar">
+        <div class="menu-item"><span class="u">F</span>ile</div>
+        <div class="menu-item"><span class="u">E</span>dit</div>
+        <div class="menu-item" onclick="resetAll()"><span class="u">R</span>eset All</div>
+        <div class="menu-item" onclick="openAbout()"><span class="u">H</span>elp</div>
+    </div>
+    <div class="toolbar">
+        <button class="tb-btn" onclick="openHome()">◀ Back</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="checkAll()">✔ Check All</button>
+        <button class="tb-btn" onclick="resetAll()">✖ Uncheck All</button>
+    </div>
+    <div class="address-bar">
+        <span class="addr-label">Address</span>
+        <input class="addr-input" type="text" value="C:\MidnightPrep\PackingList\" readonly>
+        <button class="addr-go">Go</button>
+    </div>
+    <div class="progress-row">
+        <span class="prog-label">📊 Progress:</span>
+        <div class="prog-track">
+            <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+        <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="packing-body">
+        <div class="sidebar">
+            <div>
+                <div class="sb-heading">Categories</div>
+                <div class="sb-link" onclick="scrollToCat('beauty')">🛁 Bath &amp; Beauty</div>
+                <div class="sb-link" onclick="scrollToCat('clothing')">👗 Fits &amp; Intimates</div>
+                <div class="sb-link" onclick="scrollToCat('bags')">👜 Bags &amp; Carry</div>
+                <div class="sb-link" onclick="scrollToCat('tech')">🎧 Tech &amp; Audio</div>
+            </div>
+            <div>
+                <div class="sb-heading">Actions</div>
+                <div class="sb-link" onclick="checkAll()">✔ Check All</div>
+                <div class="sb-link" onclick="resetAll()">✖ Reset</div>
+            </div>
+            <div class="sb-tip">💡 Click any item to toggle its packed status</div>
+        </div>
+        <div class="main-pane" id="packing-main"></div>
+    </div>
+    <div class="status-bar">
+        <div class="status-pane" id="status-text" style="flex:1;">0 item(s) packed</div>
+        <div class="status-pane" id="status-complete" style="display:none; color:#008000; font-weight:bold;">All Packed! Ready to go! ✈️</div>
+    </div>
+</div>
+
+<!-- ===== ABOUT DIALOG ===== -->
+<div id="about-dialog" class="win-window" role="dialog" aria-label="About Midnight Prep">
+    <div class="title-bar">
+        <span style="font-size:12px;">ℹ️</span>
+        <span class="title-bar-text">About Midnight Prep</span>
+        <div class="title-bar-controls">
+            <button class="title-btn close" onclick="closeAbout()">✕</button>
+        </div>
+    </div>
+    <div class="dlg-body">
+        <div class="dlg-icon">✈️</div>
+        <div class="dlg-text">
+            <h3>Midnight Prep 1.0</h3>
+            <p>Packing Assistant for the Night Before</p>
+            <p style="color:var(--win-shadow);">© 2000 Code by Thursday</p>
+            <p style="margin-top:6px; font-size:10px; color:#444;">This program helps you pack everything before the midnight deadline. Available memory: Unlimited ✨</p>
+        </div>
+    </div>
+    <div class="dlg-hr"></div>
+    <div class="dlg-btns">
+        <button class="win-btn primary" onclick="closeAbout()">OK</button>
+    </div>
+</div>
+
+<!-- ===== COMPLETE DIALOG ===== -->
+<div id="complete-dialog" class="win-window" role="dialog" aria-label="Packing Complete" style="display:none; width:300px;">
+    <div class="title-bar">
+        <span style="font-size:12px;">🎉</span>
+        <span class="title-bar-text">Packing Complete!</span>
+        <div class="title-bar-controls">
+            <button class="title-btn close" onclick="document.getElementById('complete-dialog').style.display='none'">✕</button>
+        </div>
+    </div>
+    <div style="padding:20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <div style="font-size:40px;">🎉</div>
+        <p style="font-size:13px; font-weight:bold;">Congratulations!</p>
+        <p style="font-size:11px; line-height:1.5;">All items have been packed.<br>You are ready before midnight!</p>
+    </div>
+    <div class="dlg-btns">
+        <button class="win-btn primary" onclick="document.getElementById('complete-dialog').style.display='none'">OK</button>
+    </div>
+</div>
+
+<!-- ===== TASKBAR ===== -->
+<div id="taskbar">
+    <button id="start-btn">
+        <span style="font-size:16px;">🪟</span> <strong>Start</strong>
     </button>
+    <div class="taskbar-sep"></div>
+    <button class="taskbar-btn" id="btn-home" onclick="restoreWin('home-window','btn-home')">
+        ✈️ Midnight Prep
+    </button>
+    <button class="taskbar-btn" id="btn-packing" style="display:none;" onclick="restoreWin('packing-window','btn-packing')">
+        💼 Packing List
+    </button>
+    <div id="clock">--:--</div>
+</div>
 
-    <div id="menu-overlay" class="fixed inset-0 z-[55] bg-[#2D1B18]/95 backdrop-blur-xl transform translate-x-full flex flex-col items-center justify-center">
-        <nav class="flex flex-col space-y-8 text-center">
-            <a href="#" onclick="switchView('home'); toggleMenu();" class="text-4xl font-serif italic text-[#EFEBE9] hover:text-[#D7CCC8] transition-colors">Home</a>
-            <a href="#" onclick="switchView('packing'); toggleMenu();" class="text-4xl font-serif italic text-[#EFEBE9] hover:text-[#D7CCC8] transition-colors">Packing List</a>
-            <div class="w-12 h-px bg-[#8D6E63] mx-auto opacity-50 my-4"></div>
-            <p class="text-sm uppercase tracking-widest text-[#A1887F]">Midnight Prep</p>
-        </nav>
-        
-        <div class="absolute bottom-20 animate-pulse">
-            <i data-lucide="moon" class="w-12 h-12 text-[#5D4037]"></i>
-        </div>
-    </div>
+<script>
+// ===== DATA =====
+const categories = [
+    { id:'beauty',   title:'Bath & Beauty',    icon:'🛁', items:['Bathing stuff & oils 🛁','Signature Perfume 🌸'] },
+    { id:'clothing', title:'Fits & Intimates', icon:'👗', items:['Costumes ✨','Cozy Zip Jacket 🧥','Bras & Panties 👙','Shoes 👠'] },
+    { id:'bags',     title:'Bags & Carry',     icon:'👜', items:['Daily Bag 👜','Small Cute Bag 👛'] },
+    { id:'tech',     title:'Tech & Audio',     icon:'🎧', items:['AirPods 🎧','Phone Charger 🔌'] }
+];
+let packedItems = JSON.parse(localStorage.getItem('midnightPackedItems') || '{}');
 
-    <div id="home-view" class="relative min-h-[100vh] w-full flex flex-col items-center justify-center overflow-x-hidden bg-[#3E2723] pt-20 pb-20">
-        <div class="absolute inset-0 z-0 parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'); opacity: 0.8;">
-            <div class="absolute inset-0 bg-[#2b1b17] bg-opacity-40 mix-blend-multiply"></div>
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#3E2723]/20 to-[#3E2723]"></div>
-        </div>
+// ===== CLOCK =====
+function tick() {
+    const n = new Date();
+    document.getElementById('clock').textContent =
+        String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick, 30000);
 
-        <div class="relative z-10 text-center px-4 fade-in-up flex-grow flex flex-col justify-center">
-            
-            <div class="inline-block p-1 rounded-full bg-[#4E342E]/50 backdrop-blur-md mb-8 shadow-xl border border-[#D7CCC8]/20 animate-pulse mx-auto w-24 h-24 sm:w-28 sm:h-28 overflow-hidden flex items-center justify-center">
-                <img src="images/mama.png" alt="Mama" class="w-full h-full object-cover rounded-full">
-            </div>
+// ===== Z-INDEX =====
+let zTop = 100;
+function front(el) { el.style.zIndex = ++zTop; }
 
-            <h1 class="text-6xl md:text-8xl font-medium text-[#EFEBE9] mb-4 tracking-tight drop-shadow-lg italic">
-                Midnight
-            </h1>
-            <h2 class="text-3xl md:text-5xl text-[#D7CCC8] font-light tracking-widest uppercase mb-10 drop-shadow-md">
-                Before 12AM
-            </h2>
-            
-            <button onclick="switchView('packing')" class="group relative px-8 py-4 bg-[#EFEBE9] text-[#3E2723] rounded-full font-serif italic text-xl shadow-[0_0_20px_rgba(239,235,233,0.3)] hover:shadow-[0_0_30px_rgba(239,235,233,0.5)] transition-all transform hover:-translate-y-1 overflow-hidden mx-auto">
-                <span class="relative z-10 flex items-center">
-                    Start Packing <i data-lucide="arrow-right" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
-                </span>
-                <div class="absolute inset-0 bg-[#D7CCC8] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 ease-out"></div>
-            </button>
-            
-            <p class="mt-8 text-lg text-[#EFEBE9]/80 font-medium glass inline-block px-6 py-2 rounded-full border-none mx-auto mb-10">
-                Let's get everything ready. ✨
-            </p>
+// ===== DRAG =====
+let drag = null;
+function startDrag(e, id) {
+    const w = document.getElementById(id);
+    if (w.classList.contains('maximized')) return;
+    front(w);
+    const r = w.getBoundingClientRect();
+    drag = { el:w, ox: e.clientX - r.left, oy: e.clientY - r.top };
+    e.preventDefault();
+}
+document.addEventListener('mousemove', e => {
+    if (!drag) return;
+    drag.el.style.left = (e.clientX - drag.ox) + 'px';
+    drag.el.style.top  = (e.clientY - drag.oy) + 'px';
+    drag.el.style.transform = 'none';
+});
+document.addEventListener('mouseup', () => drag = null);
 
-        </div>
-    </div>
+// Bring to front on click
+document.querySelectorAll('.win-window').forEach(w => {
+    w.addEventListener('mousedown', () => front(w));
+});
 
-    <div id="packing-view" class="hidden min-h-screen bg-[#3E2723] pb-32">
-        
-        <div class="relative h-48 md:h-64 flex items-center justify-center overflow-hidden rounded-b-[2rem] shadow-xl mb-6">
-            <div class="absolute inset-0 z-0 parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1494519962804-0329ac8319f2?q=80&w=2670&auto=format&fit=crop'); opacity: 0.6;">
-                <div class="absolute inset-0 bg-[#3E2723]/60"></div>
-            </div>
-            <div class="relative z-10 text-center">
-                <h2 class="text-4xl font-serif italic text-[#EFEBE9]">Packing List</h2>
-                <p class="text-[#D7CCC8] text-sm tracking-widest uppercase mt-2">Beat the 12AM deadline</p>
-            </div>
-        </div>
+// ===== WINDOW OPS =====
+function closeWin(id, btnId) {
+    const el = document.getElementById(id);
+    el.classList.remove('visible'); el.style.display = 'none';
+    if (btnId) document.getElementById(btnId).style.display = 'none';
+}
+function minimizeWin(id, btnId) {
+    document.getElementById(id).style.display = 'none';
+}
+function restoreWin(id, btnId) {
+    const el = document.getElementById(id);
+    el.style.display = 'flex'; el.classList.add('visible'); front(el);
+}
+function toggleMax(id) {
+    document.getElementById(id).classList.toggle('maximized');
+}
 
-        <div id="app-container" class="relative max-w-5xl mx-auto px-2">
-            </div>
+// ===== NAVIGATION =====
+function openHome() { restoreWin('home-window','btn-home'); }
+function openPacking() {
+    restoreWin('packing-window','btn-packing');
+    document.getElementById('btn-packing').style.display = '';
+    render();
+}
+function openAbout() {
+    const el = document.getElementById('about-dialog');
+    el.style.display = 'flex'; el.classList.add('visible'); front(el);
+}
+function closeAbout() {
+    document.getElementById('about-dialog').style.display = 'none';
+}
 
-        <footer class="text-[#8D6E63] py-12 text-center flex flex-col items-center">
-            <p class="font-serif italic text-xl mb-4 text-[#D7CCC8]">Ready before midnight. ✨</p>
-            <div class="flex items-center justify-center gap-3 opacity-60">
-                <video autoplay loop muted playsinline class="w-6 h-6 rounded-full object-cover">
-                    <source src="images/cloud.mp4" type="video/mp4">
-                </video>
-                <p class="text-[10px] uppercase tracking-widest">code by thursday</p>
-                <video autoplay loop muted playsinline class="w-6 h-6 rounded-full object-cover">
-                    <source src="images/cloud.mp4" type="video/mp4">
-                </video>
-            </div>
-        </footer>
-
-        <div class="fixed bottom-0 left-0 right-0 glass border-t border-[#FFFFFF]/10 pt-4 pb-6 px-4 z-50 shadow-[0_-4px_30px_rgba(0,0,0,0.3)] pb-safe">
-            <div class="max-w-3xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="hidden sm:block">
-                        <p class="text-[#EFEBE9] font-bold text-lg font-serif italic">Your Progress</p>
-                        <p class="text-[#A1887F] text-xs">Don't forget the little things ✨</p>
-                    </div>
-                    <div class="sm:hidden text-[#EFEBE9] font-serif text-lg"><span id="mobile-percent">0%</span> Ready</div>
-                </div>
-                
-                <div class="flex-1 mx-4 sm:mx-8">
-                    <div class="h-2 w-full bg-[#2D1B18] rounded-full overflow-hidden border border-[#5D4037]">
-                        <div id="progress-bar" class="h-full bg-gradient-to-r from-[#8D6E63] via-[#D7CCC8] to-[#EFEBE9] transition-all duration-700 ease-out shadow-[0_0_10px_rgba(215,204,200,0.5)]" style="width: 0%"></div>
-                    </div>
-                </div>
-                
-                <div class="text-[#EFEBE9]">
-                    <span id="desktop-percent" class="hidden sm:inline font-mono text-sm opacity-60">0%</span>
-                    <span id="complete-msg" class="hidden font-bold text-[#D7CCC8] animate-pulse flex items-center font-serif italic">
-                        Ready! <i data-lucide="heart" class="ml-2 w-4 h-4 fill-current"></i>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- Navigation Logic ---
-        function toggleMenu() {
-            const overlay = document.getElementById('menu-overlay');
-            const icon = document.getElementById('menu-icon');
-            const body = document.body;
-            
-            // Check if open by checking transform style
-            const isOpen = !overlay.classList.contains('translate-x-full');
-            
-            if (isOpen) {
-                // Close
-                overlay.classList.add('translate-x-full');
-                body.classList.remove('menu-open');
-                icon.setAttribute('data-lucide', 'menu');
-            } else {
-                // Open
-                overlay.classList.remove('translate-x-full');
-                body.classList.add('menu-open');
-                icon.setAttribute('data-lucide', 'x');
-            }
-            lucide.createIcons();
-        }
-
-        function switchView(viewName) {
-            const homeView = document.getElementById('home-view');
-            const packingView = document.getElementById('packing-view');
-            
-            // Scroll to top
-            window.scrollTo(0, 0);
-
-            if (viewName === 'home') {
-                homeView.classList.remove('hidden');
-                packingView.classList.add('hidden');
-            } else if (viewName === 'packing') {
-                homeView.classList.add('hidden');
-                packingView.classList.remove('hidden');
-            }
-        }
-
-        // --- Packing List Logic ---
-        const categories = [
-            {
-                id: 'beauty',
-                title: 'Bath & Beauty',
-                icon: 'flower-2',
-                items: [
-                    'Bathing stuff & oils 🛁',
-                    'Signature Perfume 🌸'
-                ]
-            },
-            {
-                id: 'clothing',
-                title: 'Fits & Intimates',
-                icon: 'sparkles',
-                items: [
-                    'Costumes ✨',
-                    'Cozy Zip Jacket 🧥',
-                    'Bras & Panties 👙',
-                    'Shoes 👠'
-                ]
-            },
-            {
-                id: 'bags',
-                title: 'Bags & Carry',
-                icon: 'shopping-bag',
-                items: [
-                    'Daily Bag 👜',
-                    'Small Cute Bag 👛'
-                ]
-            },
-            {
-                id: 'tech',
-                title: 'Tech & Audio',
-                icon: 'headphones',
-                items: [
-                    'AirPods 🎧',
-                    'Phone Charger 🔌'
-                ]
-            }
-        ];
-
-        let packedItems = JSON.parse(localStorage.getItem('midnightPackedItems')) || {};
-
-        function renderApp() {
-            const container = document.getElementById('app-container');
-            container.innerHTML = ''; 
-
-            // Spacer 1
-            container.innerHTML += createSpacer('https://images.unsplash.com/photo-1522295980068-c92c8159f81d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80', 'Glow & Glamour');
-
-            // Categories 1 & 2
-            categories.slice(0, 2).forEach((cat, index) => {
-                container.appendChild(createCategorySection(cat, index));
-            });
-
-             // Spacer 2
-             container.innerHTML += createSpacer('https://images.unsplash.com/photo-1590845947698-8924d7409b56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80', 'Grab & Go');
-
-            // Categories 3 & 4
-            categories.slice(2, 4).forEach((cat, index) => {
-                container.appendChild(createCategorySection(cat, index + 2));
-            });
-            
-            lucide.createIcons();
-            updateProgressUI();
-        }
-
-        function createSpacer(imgUrl, text) {
-            return `
-                <div class="group h-48 md:h-64 w-full rounded-[2rem] overflow-hidden relative shadow-lg mb-6 border border-[#5D4037]/30 mt-6">
-                    <div class="absolute inset-0 parallax-bg transition-transform duration-1000 scale-110" style="background-image: url('${imgUrl}'); opacity: 0.8;"></div>
-                    <div class="absolute inset-0 bg-[#3E2723]/40 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <h3 class="glass px-6 py-2 rounded-full text-xl md:text-2xl font-serif italic text-[#EFEBE9] drop-shadow-md text-center border-none">${text}</h3>
-                    </div>
-                </div>
-            `;
-        }
-
-        function createCategorySection(category, index) {
-            const section = document.createElement('div');
-            section.className = `py-2 px-1`;
-            
-            const packedCount = category.items.filter(i => packedItems[i]).length;
-
-            let itemsHtml = '';
-            category.items.forEach((item, idx) => {
-                const isPacked = packedItems[item];
-                itemsHtml += `
-                    <div onclick="toggleItem('${item}')" 
-                        class="group cursor-pointer p-4 rounded-2xl transition-all duration-200 ease-out border select-none flex items-center justify-between active:scale-[0.98] mb-3
-                        ${isPacked 
-                            ? 'bg-[#2D1B18]/60 border-transparent opacity-60' 
-                            : 'bg-[#4E342E] border-[#5D4037] shadow-lg hover:bg-[#5D4037] hover:border-[#8D6E63]'
-                        }">
-                        
-                        <div class="flex items-center space-x-3">
-                            <div class="w-2 h-2 rounded-full ${isPacked ? 'bg-[#5D4037]' : 'bg-[#D7CCC8]'}"></div>
-                            <span class="text-base font-medium transition-colors ${isPacked ? 'text-[#8D6E63] line-through decoration-[#8D6E63]' : 'text-[#EFEBE9]'}">
-                                ${item}
-                            </span>
-                        </div>
-
-                        <div class="w-6 h-6 rounded-full border flex items-center justify-center transition-all
-                            ${isPacked 
-                                ? 'bg-[#8D6E63] border-[#8D6E63]' 
-                                : 'border-[#8D6E63] bg-[#3E2723] group-hover:bg-[#4E342E]'
-                            }">
-                            ${isPacked ? '<i data-lucide="check" class="text-[#3E2723] w-3 h-3"></i>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
-
-            section.innerHTML = `
-                <div class="glass-card rounded-[2rem] p-5 md:p-8 shadow-xl">
-                    <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3 mb-2 md:mb-0">
-                            <div class="p-2 bg-[#3E2723] rounded-xl shadow-inner border border-[#5D4037] text-[#D7CCC8]">
-                                <i data-lucide="${category.icon}" class="w-4 h-4"></i>
-                            </div>
-                            <h2 class="text-xl font-serif italic text-[#D7CCC8]">${category.title}</h2>
-                        </div>
-                        <div class="text-[#A1887F] text-[10px] font-bold uppercase tracking-widest bg-[#2D1B18] px-3 py-1.5 rounded-full border border-[#3E2723]">
-                            ${packedCount} / ${category.items.length} Packed
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        ${itemsHtml}
-                    </div>
-                </div>
-            `;
-            return section;
-        }
-
-        function toggleItem(item) {
-            if (packedItems[item]) {
-                delete packedItems[item];
-            } else {
-                packedItems[item] = true;
-            }
-            localStorage.setItem('midnightPackedItems', JSON.stringify(packedItems));
-            renderApp();
-        }
-
-        function updateProgressUI() {
-            const totalItems = categories.reduce((acc, cat) => acc + cat.items.length, 0);
-            const checkedItems = Object.values(packedItems).filter(Boolean).length;
-            const progress = totalItems === 0 ? 0 : Math.round((checkedItems / totalItems) * 100);
-
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            document.getElementById('mobile-percent').innerText = `${progress}%`;
-            
-            const desktopPercent = document.getElementById('desktop-percent');
-            const completeMsg = document.getElementById('complete-msg');
-
-            if (progress === 100) {
-                desktopPercent.classList.add('hidden');
-                completeMsg.classList.remove('hidden');
-            } else {
-                desktopPercent.innerText = `${progress}%`;
-                desktopPercent.classList.remove('hidden');
-                completeMsg.classList.add('hidden');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderApp();
-            lucide.createIcons();
+// ===== RENDER =====
+function render() {
+    const main = document.getElementById('packing-main');
+    main.innerHTML = '';
+    categories.forEach(cat => {
+        const pc = cat.items.filter(i => packedItems[i]).length;
+        let rows = '';
+        cat.items.forEach(item => {
+            const p = !!packedItems[item];
+            const safeItem = item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+            rows += `<div class="pack-item${p?' packed':''}" onclick="toggle('${safeItem}')">
+                <div class="pack-cb">${p ? '✓' : ''}</div>
+                <span style="flex-shrink:0;">${cat.icon}</span>
+                <span class="pack-label">${item}</span>
+            </div>`;
         });
+        const sec = document.createElement('div');
+        sec.className = 'cat-section';
+        sec.id = 'cat-' + cat.id;
+        sec.innerHTML = `
+            <div class="cat-header">
+                <div class="cat-header-left"><span>${cat.icon}</span><span>${cat.title}</span></div>
+                <span class="cat-count">${pc}/${cat.items.length}</span>
+            </div>
+            <div>${rows}</div>`;
+        main.appendChild(sec);
+    });
+    updateProg();
+}
 
-    </script>
+function toggle(item) {
+    packedItems[item] ? delete packedItems[item] : (packedItems[item] = true);
+    localStorage.setItem('midnightPackedItems', JSON.stringify(packedItems));
+    render();
+}
+function checkAll() {
+    categories.forEach(c => c.items.forEach(i => packedItems[i] = true));
+    localStorage.setItem('midnightPackedItems', JSON.stringify(packedItems));
+    render();
+}
+function resetAll() {
+    packedItems = {};
+    localStorage.setItem('midnightPackedItems', JSON.stringify(packedItems));
+    // Reset complete dialog so it can show again
+    document.getElementById('complete-dialog').dataset.shown = '';
+    render();
+}
+function updateProg() {
+    const total = categories.reduce((s,c) => s + c.items.length, 0);
+    const done  = Object.values(packedItems).filter(Boolean).length;
+    const pct   = total ? Math.round(done/total*100) : 0;
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('status-text').textContent = `${done} of ${total} item(s) packed`;
+    const comp = document.getElementById('status-complete');
+    const dlg  = document.getElementById('complete-dialog');
+    if (pct === 100) {
+        comp.style.display = '';
+        if (!dlg.dataset.shown) {
+            dlg.style.display = 'flex'; dlg.classList.add('visible');
+            dlg.dataset.shown = '1'; front(dlg);
+        }
+    } else {
+        comp.style.display = 'none';
+    }
+}
+function scrollToCat(id) {
+    const el = document.getElementById('cat-' + id);
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+document.addEventListener('DOMContentLoaded', render);
+</script>
 </body>
 </html>
