@@ -1,1 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#3E2723">
+    
+    <title>Midnight Prep ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #3E2723; /* Deep Brown Background */
+            color: #EFEBE9; /* Light Cream Text */
+            /* Prevent bounce effect on iOS */
+            overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
 
+        /* Custom Parallax & Animations */
+        .parallax-bg {
+            background-attachment: scroll; 
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        @media (min-width: 768px) {
+            .parallax-bg {
+                background-attachment: fixed;
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 8s linear infinite;
+        }
+
+        @keyframes sound-bar {
+            0%, 100% { height: 4px; }
+            50% { height: 12px; }
+        }
+        .animate-sound-1 { animation: sound-bar 0.8s ease-in-out infinite; }
+        .animate-sound-2 { animation: sound-bar 0.9s ease-in-out infinite 0.1s; }
+        .animate-sound-3 { animation: sound-bar 0.7s ease-in-out infinite 0.2s; }
+
+        /* Glassmorphism utility - Darker for brown theme */
+        .glass {
+            background: rgba(62, 39, 35, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-player {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .glass-card {
+            background: rgba(78, 52, 46, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Aesthetics Scrollbar for Lyrics */
+        .lyrics-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .lyrics-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .lyrics-scroll::-webkit-scrollbar-thumb {
+            background: rgba(215, 204, 200, 0.4);
+            border-radius: 4px;
+        }
+
+        /* Mobile Safe Area utilities */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Menu Overlay Transition */
+        #menu-overlay {
+            transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        
+        .menu-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="selection:bg-[#D7CCC8] selection:text-[#3E2723] pb-safe">
+
+    <button onclick="toggleMenu()" class="fixed top-6 right-6 z-[60] p-3 rounded-full glass text-[#EFEBE9] hover:bg-white/10 transition-all shadow-lg active:scale-95">
+        <i id="menu-icon" data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+
+    <div id="menu-overlay" class="fixed inset-0 z-[55] bg-[#2D1B18]/95 backdrop-blur-xl transform translate-x-full flex flex-col items-center justify-center">
+        <nav class="flex flex-col space-y-8 text-center">
+            <a href="#" onclick="switchView('home'); toggleMenu();" class="text-4xl font-serif italic text-[#EFEBE9] hover:text-[#D7CCC8] transition-colors">Home</a>
+            <a href="#" onclick="switchView('packing'); toggleMenu();" class="text-4xl font-serif italic text-[#EFEBE9] hover:text-[#D7CCC8] transition-colors">Packing List</a>
+            <div class="w-12 h-px bg-[#8D6E63] mx-auto opacity-50 my-4"></div>
+            <p class="text-sm uppercase tracking-widest text-[#A1887F]">Midnight Prep</p>
+        </nav>
+        
+        <div class="absolute bottom-20 animate-pulse">
+            <i data-lucide="moon" class="w-12 h-12 text-[#5D4037]"></i>
+        </div>
+    </div>
+
+    <div id="home-view" class="relative min-h-[100vh] w-full flex flex-col items-center justify-center overflow-x-hidden bg-[#3E2723] pt-20 pb-20">
+        <div class="absolute inset-0 z-0 parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'); opacity: 0.8;">
+            <div class="absolute inset-0 bg-[#2b1b17] bg-opacity-40 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#3E2723]/20 to-[#3E2723]"></div>
+        </div>
+
+        <div class="relative z-10 text-center px-4 fade-in-up flex-grow flex flex-col justify-center">
+            <div class="inline-block p-4 rounded-full bg-[#4E342E]/50 backdrop-blur-md mb-8 shadow-xl border border-[#D7CCC8]/20 animate-pulse mx-auto">
+                <i data-lucide="sparkles" class="text-[#D7CCC8] w-12 h-12 drop-shadow-md"></i>
+            </div>
+            <h1 class="text-6xl md:text-8xl font-medium text-[#EFEBE9] mb-4 tracking-tight drop-shadow-lg italic">
+                Midnight
+            </h1>
+            <h2 class="text-3xl md:text-5xl text-[#D7CCC8] font-light tracking-widest uppercase mb-10 drop-shadow-md">
+                Before 12AM
+            </h2>
+            
+            <button onclick="switchView('packing')" class="group relative px-8 py-4 bg-[#EFEBE9] text-[#3E2723] rounded-full font-serif italic text-xl shadow-[0_0_20px_rgba(239,235,233,0.3)] hover:shadow-[0_0_30px_rgba(239,235,233,0.5)] transition-all transform hover:-translate-y-1 overflow-hidden mx-auto">
+                <span class="relative z-10 flex items-center">
+                    Start Packing <i data-lucide="arrow-right" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </span>
+                <div class="absolute inset-0 bg-[#D7CCC8] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 ease-out"></div>
+            </button>
+            
+            <p class="mt-8 text-lg text-[#EFEBE9]/80 font-medium glass inline-block px-6 py-2 rounded-full border-none mx-auto mb-10">
+                Let's get everything ready. ✨
+            </p>
+
+            <div class="flex flex-col gap-6 w-full max-w-[320px] mx-auto">
+                
+                <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="glass-player p-4 rounded-3xl flex items-center gap-4 hover:scale-[1.02] transition-transform duration-500">
+                        <div class="relative w-14 h-14 flex-shrink-0">
+                            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#8D6E63] to-[#D7CCC8] animate-spin-slow opacity-80 border border-white/20"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-4 h-4 bg-[#3E2723] rounded-full border border-white/30"></div>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex justify-between items-end mb-1">
+                                <div class="flex flex-col text-left">
+                                    <span class="text-[#EFEBE9] font-serif italic text-lg leading-tight truncate">Heaven Sent</span>
+                                    <span class="text-[#D7CCC8]/70 text-[10px] tracking-[0.2em] uppercase">Now Playing</span>
+                                </div>
+                                <div class="flex gap-1 items-end h-3 pb-1">
+                                    <div class="w-0.5 bg-[#D7CCC8] animate-sound-1"></div>
+                                    <div class="w-0.5 bg-[#D7CCC8] animate-sound-2"></div>
+                                    <div class="w-0.5 bg-[#D7CCC8] animate-sound-3"></div>
+                                </div>
+                            </div>
+                            <audio controls class="w-full h-6 block opacity-70 hover:opacity-100 transition-opacity" style="filter: sepia(20%) brightness(0.9) contrast(0.8) invert(0.1);">
+                                <source src="music/heaven sent.mp3" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                    <button onclick="toggleLyrics('1')" class="mt-2 px-4 py-1.5 glass rounded-full text-[#EFEBE9] text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center mx-auto group border border-white/10">
+                        <span class="mr-2">Lyrics</span>
+                        <i id="lyrics-chevron-1" data-lucide="chevron-down" class="w-3 h-3 group-hover:translate-y-1 transition-transform"></i>
+                    </button>
+                    <div id="lyrics-container-1" class="hidden overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="mt-2 glass p-4 rounded-2xl max-h-32 overflow-y-auto lyrics-scroll text-center border border-white/10">
+                            <p class="text-[#EFEBE9]/90 text-sm font-serif italic leading-6">
+                                Sent from heaven<br>
+                                Sent from heaven<br>
+                                Now I'm overjoyed<br>
+                                Thinking about the love we share<br>
+                                The joy inside I can't hide<br>
+                                It's the little things you do<br>
+                                That make me want to be with you...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="glass-player p-4 rounded-3xl flex items-center gap-4 hover:scale-[1.02] transition-transform duration-500">
+                        <div class="relative w-14 h-14 flex-shrink-0">
+                            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#A1887F] to-[#EFEBE9] animate-spin-slow opacity-80 border border-white/20"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-4 h-4 bg-[#3E2723] rounded-full border border-white/30"></div>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex justify-between items-end mb-1">
+                                <div class="flex flex-col text-left">
+                                    <span class="text-[#EFEBE9] font-serif italic text-lg leading-tight truncate">I Love Your Smile</span>
+                                    <span class="text-[#D7CCC8]/70 text-[10px] tracking-[0.2em] uppercase">Track 02</span>
+                                </div>
+                                <div class="flex gap-1 items-end h-3 pb-1">
+                                    <div class="w-0.5 bg-[#D7CCC8] animate-sound-2"></div>
+                                    <div class="w-0.5 bg-[#D7CCC8] animate-sound-3"></div>
+                                    <div class="w-0.5 bg-[#D7CCC8] animate-sound-1"></div>
+                                </div>
+                            </div>
+                            <audio controls class="w-full h-6 block opacity-70 hover:opacity-100 transition-opacity" style="filter: sepia(20%) brightness(0.9) contrast(0.8) invert(0.1);">
+                                <source src="music/i love your smile.mp3" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                    <button onclick="toggleLyrics('2')" class="mt-2 px-4 py-1.5 glass rounded-full text-[#EFEBE9] text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center mx-auto group border border-white/10">
+                        <span class="mr-2">Lyrics</span>
+                        <i id="lyrics-chevron-2" data-lucide="chevron-down" class="w-3 h-3 group-hover:translate-y-1 transition-transform"></i>
+                    </button>
+                    <div id="lyrics-container-2" class="hidden overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="mt-2 glass p-4 rounded-2xl max-h-32 overflow-y-auto lyrics-scroll text-center border border-white/10">
+                            <p class="text-[#EFEBE9]/90 text-sm font-serif italic leading-6">
+                                I love your smile<br>
+                                I really do<br>
+                                It's the way you make me feel<br>
+                                When I'm with you<br>
+                                I love your smile...<br>
+                                Sitting in my class, drifting away<br>
+                                Staring into the windows of the world...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="packing-view" class="hidden min-h-screen bg-[#3E2723] pb-32">
+        
+        <div class="relative h-48 md:h-64 flex items-center justify-center overflow-hidden rounded-b-[2rem] shadow-xl mb-6">
+            <div class="absolute inset-0 z-0 parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1494519962804-0329ac8319f2?q=80&w=2670&auto=format&fit=crop'); opacity: 0.6;">
+                <div class="absolute inset-0 bg-[#3E2723]/60"></div>
+            </div>
+            <div class="relative z-10 text-center">
+                <h2 class="text-4xl font-serif italic text-[#EFEBE9]">Packing List</h2>
+                <p class="text-[#D7CCC8] text-sm tracking-widest uppercase mt-2">Beat the 12AM deadline</p>
+            </div>
+        </div>
+
+        <div id="app-container" class="relative max-w-5xl mx-auto px-2">
+            </div>
+
+        <footer class="text-[#8D6E63] py-12 text-center flex flex-col items-center">
+            <p class="font-serif italic text-xl mb-4 text-[#D7CCC8]">Ready before midnight. ✨</p>
+            <div class="flex items-center justify-center gap-3 opacity-60">
+                <video autoplay loop muted playsinline class="w-6 h-6 rounded-full object-cover">
+                    <source src="images/cloud.mp4" type="video/mp4">
+                </video>
+                <p class="text-[10px] uppercase tracking-widest">code by thursday</p>
+                <video autoplay loop muted playsinline class="w-6 h-6 rounded-full object-cover">
+                    <source src="images/cloud.mp4" type="video/mp4">
+                </video>
+            </div>
+        </footer>
+
+        <div class="fixed bottom-0 left-0 right-0 glass border-t border-[#FFFFFF]/10 pt-4 pb-6 px-4 z-50 shadow-[0_-4px_30px_rgba(0,0,0,0.3)] pb-safe">
+            <div class="max-w-3xl mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="hidden sm:block">
+                        <p class="text-[#EFEBE9] font-bold text-lg font-serif italic">Your Progress</p>
+                        <p class="text-[#A1887F] text-xs">Don't forget the little things ✨</p>
+                    </div>
+                    <div class="sm:hidden text-[#EFEBE9] font-serif text-lg"><span id="mobile-percent">0%</span> Ready</div>
+                </div>
+                
+                <div class="flex-1 mx-4 sm:mx-8">
+                    <div class="h-2 w-full bg-[#2D1B18] rounded-full overflow-hidden border border-[#5D4037]">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-[#8D6E63] via-[#D7CCC8] to-[#EFEBE9] transition-all duration-700 ease-out shadow-[0_0_10px_rgba(215,204,200,0.5)]" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="text-[#EFEBE9]">
+                    <span id="desktop-percent" class="hidden sm:inline font-mono text-sm opacity-60">0%</span>
+                    <span id="complete-msg" class="hidden font-bold text-[#D7CCC8] animate-pulse flex items-center font-serif italic">
+                        Ready! <i data-lucide="heart" class="ml-2 w-4 h-4 fill-current"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Navigation Logic ---
+        function toggleMenu() {
+            const overlay = document.getElementById('menu-overlay');
+            const icon = document.getElementById('menu-icon');
+            const body = document.body;
+            
+            // Check if open by checking transform style
+            const isOpen = !overlay.classList.contains('translate-x-full');
+            
+            if (isOpen) {
+                // Close
+                overlay.classList.add('translate-x-full');
+                body.classList.remove('menu-open');
+                icon.setAttribute('data-lucide', 'menu');
+            } else {
+                // Open
+                overlay.classList.remove('translate-x-full');
+                body.classList.add('menu-open');
+                icon.setAttribute('data-lucide', 'x');
+            }
+            lucide.createIcons();
+        }
+
+        function switchView(viewName) {
+            const homeView = document.getElementById('home-view');
+            const packingView = document.getElementById('packing-view');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+
+            if (viewName === 'home') {
+                homeView.classList.remove('hidden');
+                packingView.classList.add('hidden');
+            } else if (viewName === 'packing') {
+                homeView.classList.add('hidden');
+                packingView.classList.remove('hidden');
+            }
+        }
+
+        // --- Lyrics Logic ---
+        function toggleLyrics(id) {
+            const lyricsContainer = document.getElementById(`lyrics-container-${id}`);
+            const chevron = document.getElementById(`lyrics-chevron-${id}`);
+            
+            if (lyricsContainer.classList.contains('hidden')) {
+                lyricsContainer.classList.remove('hidden');
+                chevron.classList.remove('rotate-0');
+                chevron.classList.add('rotate-180');
+            } else {
+                lyricsContainer.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+                chevron.classList.add('rotate-0');
+            }
+        }
+
+        // --- Packing List Logic ---
+        const categories = [
+            {
+                id: 'beauty',
+                title: 'Bath & Beauty',
+                icon: 'flower-2',
+                items: [
+                    'Bathing stuff & oils 🛁',
+                    'Signature Perfume 🌸'
+                ]
+            },
+            {
+                id: 'clothing',
+                title: 'Fits & Intimates',
+                icon: 'sparkles',
+                items: [
+                    'Costumes ✨',
+                    'Cozy Zip Jacket 🧥',
+                    'Bras & Panties 👙',
+                    'Shoes 👠'
+                ]
+            },
+            {
+                id: 'bags',
+                title: 'Bags & Carry',
+                icon: 'shopping-bag',
+                items: [
+                    'Daily Bag 👜',
+                    'Small Cute Bag 👛'
+                ]
+            },
+            {
+                id: 'tech',
+                title: 'Tech & Audio',
+                icon: 'headphones',
+                items: [
+                    'AirPods 🎧',
+                    'Phone Charger 🔌'
+                ]
+            }
+        ];
+
+        let packedItems = JSON.parse(localStorage.getItem('midnightPackedItems')) || {};
+
+        function renderApp() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = ''; 
+
+            // Spacer 1
+            container.innerHTML += createSpacer('https://images.unsplash.com/photo-1522295980068-c92c8159f81d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80', 'Glow & Glamour');
+
+            // Categories 1 & 2
+            categories.slice(0, 2).forEach((cat, index) => {
+                container.appendChild(createCategorySection(cat, index));
+            });
+
+             // Spacer 2
+             container.innerHTML += createSpacer('https://images.unsplash.com/photo-1590845947698-8924d7409b56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80', 'Grab & Go');
+
+            // Categories 3 & 4
+            categories.slice(2, 4).forEach((cat, index) => {
+                container.appendChild(createCategorySection(cat, index + 2));
+            });
+            
+            lucide.createIcons();
+            updateProgressUI();
+        }
+
+        function createSpacer(imgUrl, text) {
+            return `
+                <div class="group h-48 md:h-64 w-full rounded-[2rem] overflow-hidden relative shadow-lg mb-6 border border-[#5D4037]/30 mt-6">
+                    <div class="absolute inset-0 parallax-bg transition-transform duration-1000 scale-110" style="background-image: url('${imgUrl}'); opacity: 0.8;"></div>
+                    <div class="absolute inset-0 bg-[#3E2723]/40 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <h3 class="glass px-6 py-2 rounded-full text-xl md:text-2xl font-serif italic text-[#EFEBE9] drop-shadow-md text-center border-none">${text}</h3>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createCategorySection(category, index) {
+            const section = document.createElement('div');
+            section.className = `py-2 px-1`;
+            
+            const packedCount = category.items.filter(i => packedItems[i]).length;
+
+            let itemsHtml = '';
+            category.items.forEach((item, idx) => {
+                const isPacked = packedItems[item];
+                itemsHtml += `
+                    <div onclick="toggleItem('${item}')" 
+                        class="group cursor-pointer p-4 rounded-2xl transition-all duration-200 ease-out border select-none flex items-center justify-between active:scale-[0.98] mb-3
+                        ${isPacked 
+                            ? 'bg-[#2D1B18]/60 border-transparent opacity-60' 
+                            : 'bg-[#4E342E] border-[#5D4037] shadow-lg hover:bg-[#5D4037] hover:border-[#8D6E63]'
+                        }">
+                        
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 rounded-full ${isPacked ? 'bg-[#5D4037]' : 'bg-[#D7CCC8]'}"></div>
+                            <span class="text-base font-medium transition-colors ${isPacked ? 'text-[#8D6E63] line-through decoration-[#8D6E63]' : 'text-[#EFEBE9]'}">
+                                ${item}
+                            </span>
+                        </div>
+
+                        <div class="w-6 h-6 rounded-full border flex items-center justify-center transition-all
+                            ${isPacked 
+                                ? 'bg-[#8D6E63] border-[#8D6E63]' 
+                                : 'border-[#8D6E63] bg-[#3E2723] group-hover:bg-[#4E342E]'
+                            }">
+                            ${isPacked ? '<i data-lucide="check" class="text-[#3E2723] w-3 h-3"></i>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            section.innerHTML = `
+                <div class="glass-card rounded-[2rem] p-5 md:p-8 shadow-xl">
+                    <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3 mb-2 md:mb-0">
+                            <div class="p-2 bg-[#3E2723] rounded-xl shadow-inner border border-[#5D4037] text-[#D7CCC8]">
+                                <i data-lucide="${category.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl font-serif italic text-[#D7CCC8]">${category.title}</h2>
+                        </div>
+                        <div class="text-[#A1887F] text-[10px] font-bold uppercase tracking-widest bg-[#2D1B18] px-3 py-1.5 rounded-full border border-[#3E2723]">
+                            ${packedCount} / ${category.items.length} Packed
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        ${itemsHtml}
+                    </div>
+                </div>
+            `;
+            return section;
+        }
+
+        function toggleItem(item) {
+            if (packedItems[item]) {
+                delete packedItems[item];
+            } else {
+                packedItems[item] = true;
+            }
+            localStorage.setItem('midnightPackedItems', JSON.stringify(packedItems));
+            renderApp();
+        }
+
+        function updateProgressUI() {
+            const totalItems = categories.reduce((acc, cat) => acc + cat.items.length, 0);
+            const checkedItems = Object.values(packedItems).filter(Boolean).length;
+            const progress = totalItems === 0 ? 0 : Math.round((checkedItems / totalItems) * 100);
+
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('mobile-percent').innerText = `${progress}%`;
+            
+            const desktopPercent = document.getElementById('desktop-percent');
+            const completeMsg = document.getElementById('complete-msg');
+
+            if (progress === 100) {
+                desktopPercent.classList.add('hidden');
+                completeMsg.classList.remove('hidden');
+            } else {
+                desktopPercent.innerText = `${progress}%`;
+                desktopPercent.classList.remove('hidden');
+                completeMsg.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderApp();
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+</html>
